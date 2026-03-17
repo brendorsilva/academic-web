@@ -1,15 +1,20 @@
 export type Treatment = "SR" | "SRA" | "PROF" | "DR" | "DRA";
 export type Sex = "MALE" | "FEMALE";
-export type Qualification = "Titulação" | "Graduação" | "Especialização" | "Mestrado" | "Doutorado";
+export type Qualification =
+  | "Titulação"
+  | "Graduação"
+  | "Especialização"
+  | "Mestrado"
+  | "Doutorado";
 
 export interface Teacher {
   id: string;
-  avatar?: string;
-  treatment: Treatment;
+  photoUrl?: string;
+  title: Treatment;
   fullName: string;
   sex: Sex;
   birthDate: string;
-  active: boolean;
+  isActive: boolean;
   rg: string;
   cpf: string;
   ctpsNumber: string;

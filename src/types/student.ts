@@ -1,6 +1,6 @@
 export interface Student {
   id: string;
-  avatar?: string;
+  photoUrl?: string;
   fullName: string;
   cpf: string;
   rg: string;
