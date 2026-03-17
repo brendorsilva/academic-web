@@ -14,4 +14,16 @@ export const AuthService = {
   logout() {
     localStorage.removeItem("@AcademicSystem:token");
   },
+
+  getUser() {
+    const token = localStorage.getItem("@AcademicSystem:token");
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload;
+    } catch (error) {
+      return null;
+    }
+  },
 };

@@ -17,6 +17,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+// Novas importações para o Perfil e Logout
+import { AuthService } from "@/services/auth.service";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 const navItems = [
   { title: "Início", url: "/dashboard", icon: Home },
   { title: "Alunos", url: "/students", icon: Users },
@@ -31,7 +43,9 @@ function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarContent>
         <div className={`px-4 py-5 ${collapsed ? "px-2" : ""}`}>
-          <h1 className={`font-bold text-foreground ${collapsed ? "text-center text-sm" : "text-lg"}`}>
+          <h1
+            className={`font-bold text-foreground ${collapsed ? "text-center text-sm" : "text-lg"}`}
+          >
             {collapsed ? "GA" : "Gestão Acadêmica"}
           </h1>
         </div>
@@ -66,6 +80,18 @@ function AppSidebar() {
 function Topbar() {
   const navigate = useNavigate();
 
+  // Lógica do Utilizador Logado
+  const user = AuthService.getUser();
+  const userName =
+    user?.name || user?.fullName || user?.email || "Administrador";
+  const userEmail = user?.email || "admin@sistema.com";
+  const userInitials = userName.substring(0, 2).toUpperCase();
+
+  const handleLogout = () => {
+    AuthService.logout(); // Limpa o token do LocalStorage
+    navigate("/login"); // Redireciona para o login
+  };
+
   return (
     <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
       <div className="flex items-center gap-2">
@@ -73,16 +99,38 @@ function Topbar() {
           <Menu className="h-5 w-5" />
         </SidebarTrigger>
       </div>
+
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-foreground">Admin</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate("/login")}
-          title="Sair"
-        >
-          <LogOut className="h-4 w-4" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+              <Avatar className="h-9 w-9">
+                <AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent className="w-56" align="end" forceMount>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{userName}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {userEmail}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleLogout}
+              className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Sair do Sistema</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
