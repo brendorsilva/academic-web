@@ -10,6 +10,18 @@ import StudentFormPage from "./pages/StudentFormPage";
 import TeachersPage from "./pages/TeachersPage";
 import TeacherFormPage from "./pages/TeacherFormPage";
 import NotFound from "./pages/NotFound";
+import CoursesPage from "./pages/CoursesPage";
+import CourseFormPage from "./pages/CourseFormPage";
+import AcademicPeriodsPage from "./pages/AcademicPeriodsPage";
+import AcademicPeriodFormPage from "./pages/AcademicPeriodFormPage";
+import SubjectsPage from "./pages/SubjectsPage";
+import SubjectFormPage from "./pages/SubjectFormPage";
+import ClassGroupsPage from "./pages/ClassGroupsPage";
+import ClassGroupFormPage from "./pages/ClassGroupFormPage";
+import ClassSubjectsPage from "./pages/ClassSubjectsPage";
+import ClassSubjectFormPage from "./pages/ClassSubjectFormPage";
+import EnrollmentsPage from "./pages/EnrollmentsPage";
+import EnrollmentFormPage from "./pages/EnrollmentFormPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +39,35 @@ const App = () => (
           <Route path="/students/:id" element={<StudentFormPage />} />
           <Route path="/teachers" element={<TeachersPage />} />
           <Route path="/teachers/:id" element={<TeacherFormPage />} />
+          <Route path="/courses" element={<CoursesPage />} />
+          <Route path="/courses/new" element={<CourseFormPage />} />
+          <Route path="/courses/:id" element={<CourseFormPage />} />
+          <Route path="/academic-periods" element={<AcademicPeriodsPage />} />
+          <Route path="/subjects" element={<SubjectsPage />} />
+          <Route path="/subjects/new" element={<SubjectFormPage />} />
+          <Route path="/subjects/:id" element={<SubjectFormPage />} />
+          <Route path="/class-groups" element={<ClassGroupsPage />} />
+          <Route path="/class-groups/new" element={<ClassGroupFormPage />} />
+          <Route path="/class-groups/:id" element={<ClassGroupFormPage />} />
+          <Route path="/class-subjects" element={<ClassSubjectsPage />} />
+          <Route path="/enrollments" element={<EnrollmentsPage />} />
+          <Route path="/enrollments/new" element={<EnrollmentFormPage />} />
+          <Route
+            path="/class-subjects/new"
+            element={<ClassSubjectFormPage />}
+          />
+          <Route
+            path="/class-subjects/:id"
+            element={<ClassSubjectFormPage />}
+          />
+          <Route
+            path="/academic-periods/new"
+            element={<AcademicPeriodFormPage />}
+          />
+          <Route
+            path="/academic-periods/:id"
+            element={<AcademicPeriodFormPage />}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

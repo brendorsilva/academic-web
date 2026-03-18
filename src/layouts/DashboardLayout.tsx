@@ -1,6 +1,18 @@
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Users, GraduationCap, LogOut, Menu } from "lucide-react";
+import {
+  Home,
+  Users,
+  GraduationCap,
+  LogOut,
+  Menu,
+  BookOpen,
+  CalendarDays,
+  Library,
+  Presentation,
+  BookOpenCheck,
+  UserCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -33,6 +45,12 @@ const navItems = [
   { title: "Início", url: "/dashboard", icon: Home },
   { title: "Alunos", url: "/students", icon: Users },
   { title: "Professores", url: "/teachers", icon: GraduationCap },
+  { title: "Cursos", url: "/courses", icon: BookOpen },
+  { title: "Períodos Letivos", url: "/academic-periods", icon: CalendarDays },
+  { title: "Disciplinas", url: "/subjects", icon: Library },
+  { title: "Turmas", url: "/class-groups", icon: Presentation },
+  { title: "Ofertas (Aulas)", url: "/class-subjects", icon: BookOpenCheck },
+  { title: "Matrículas", url: "/enrollments", icon: UserCheck },
 ];
 
 function AppSidebar() {
