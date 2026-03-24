@@ -1,7 +1,9 @@
 import axios from "axios";
 
+// https://academic-api-h2fd.onrender.com
+
 export const api = axios.create({
-  baseURL: "https://academic-api-h2fd.onrender.com",
+  baseURL: "http://localhost:3000",
 });
 
 api.interceptors.request.use((config) => {

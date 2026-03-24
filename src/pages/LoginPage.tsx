@@ -18,9 +18,38 @@ export default function LoginPage() {
 
     try {
       setIsLoading(true);
+
+      // 1. Faz o login e guarda o token
       await AuthService.login(email, password);
+
+      // 2. Lê o user do token recém-guardado
+      const user = AuthService.getUser();
+
       toast.success("Login bem-sucedido!");
+
+      // 3. Valida primeiro a senha
+      if (user?.mustChangePassword === true) {
+        console.log("Redirecionando para /change-password");
+        navigate("/change-password");
+        return; // Sai da função imediatamente
+      }
+
+      // 4. Se a senha já estiver OK, vai para o painel correto
+      console.log("Senha OK. Redirecionando para o painel de:", user?.role);
+
+      if (user?.role === "STUDENT") {
+        navigate("/student/dashboard");
+        return; // Sai da função
+      }
+
+      if (user?.role === "TEACHER") {
+        navigate("/teacher/dashboard");
+        return; // Sai da função
+      }
+
+      // Se não for aluno nem professor, é ADMIN ou COORDINATOR
       navigate("/dashboard");
+      return; // Sai da função
     } catch (error) {
       toast.error("Credenciais inválidas. Tente novamente.");
       console.error(error);

@@ -22,6 +22,10 @@ export const TeachersService = {
     return response.data;
   },
 
+  async delete(id: string): Promise<void> {
+    await api.delete(`/teachers/${id}`);
+  },
+
   async uploadPhoto(teacherId: string, file: File): Promise<Teacher> {
     const formData = new FormData();
     formData.append("file", file);

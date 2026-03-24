@@ -71,6 +71,7 @@ export interface ClassSubject {
   classGroup?: Partial<ClassGroup>;
   subject?: Partial<Subject>;
   teacher?: Teacher;
+  studentSubjects?: any[];
 }
 
 export interface EnrollmentSubject {

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CoursesService } from "@/services/courses.service";
 import { Course } from "@/types/academic";
 import DashboardLayout from "@/layouts/DashboardLayout";
+import { SearchInput } from "@/components/shared/SearchInput";
 
 // Dicionários de Tradução
 const modalityMap: Record<string, string> = {
@@ -25,6 +26,7 @@ export default function CoursesPage() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const fetchCourses = async () => {
     try {
@@ -54,20 +56,37 @@ export default function CoursesPage() {
     }
   };
 
+  const filteredCourses = courses.filter(
+    (course) =>
+      course.name.toLowerCase().includes(search.toLowerCase()) ||
+      course.code.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Cursos</h2>
             <p className="text-muted-foreground">
               Gerencie os cursos e níveis de ensino da instituição.
             </p>
           </div>
-          <Button onClick={() => navigate("/courses/new")}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Curso
-          </Button>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              placeholder="Buscar por nome ou código..."
+            />
+            <Button
+              onClick={() => navigate("/courses/new")}
+              className="w-full sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Curso
+            </Button>
+          </div>
         </div>
 
         <div className="rounded-md border bg-card">
@@ -76,78 +95,82 @@ export default function CoursesPage() {
               Carregando cursos...
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="border-b bg-muted/50">
-                <tr>
-                  <th className="h-12 px-4 text-left font-medium">Código</th>
-                  <th className="h-12 px-4 text-left font-medium">
-                    Nome do Curso
-                  </th>
-                  <th className="h-12 px-4 text-left font-medium">
-                    Modalidade
-                  </th>
-                  <th className="h-12 px-4 text-left font-medium">Nível</th>
-                  <th className="h-12 px-4 text-center font-medium">Status</th>
-                  <th className="h-12 px-4 text-right font-medium">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {courses.length === 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b bg-muted/50 whitespace-nowrap">
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="h-24 text-center text-muted-foreground"
-                    >
-                      Nenhum curso encontrado.
-                    </td>
+                    <th className="h-12 px-4 text-left font-medium">Código</th>
+                    <th className="h-12 px-4 text-left font-medium">
+                      Nome do Curso
+                    </th>
+                    <th className="h-12 px-4 text-left font-medium">
+                      Modalidade
+                    </th>
+                    <th className="h-12 px-4 text-left font-medium">Nível</th>
+                    <th className="h-12 px-4 text-center font-medium">
+                      Status
+                    </th>
+                    <th className="h-12 px-4 text-right font-medium">Ações</th>
                   </tr>
-                ) : (
-                  courses.map((course) => (
-                    <tr
-                      key={course.id}
-                      className="border-b transition-colors hover:bg-muted/50"
-                    >
-                      <td className="p-4 font-medium">{course.code}</td>
-                      <td className="p-4">{course.name}</td>
-                      <td className="p-4">
-                        {modalityMap[course.modality] || course.modality}
-                      </td>
-                      <td className="p-4">
-                        {levelMap[course.level] || course.level}
-                      </td>
-                      <td className="p-4 text-center">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                            course.isActive
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                        >
-                          {course.isActive ? "Ativo" : "Inativo"}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => navigate(`/courses/${course.id}`)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDelete(course.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                </thead>
+                <tbody>
+                  {filteredCourses.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="h-24 text-center text-muted-foreground"
+                      >
+                        Nenhum curso encontrado.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredCourses.map((course) => (
+                      <tr
+                        key={course.id}
+                        className="border-b transition-colors hover:bg-muted/50"
+                      >
+                        <td className="p-4 font-medium">{course.code}</td>
+                        <td className="p-4">{course.name}</td>
+                        <td className="p-4">
+                          {modalityMap[course.modality] || course.modality}
+                        </td>
+                        <td className="p-4">
+                          {levelMap[course.level] || course.level}
+                        </td>
+                        <td className="p-4 text-center">
+                          <span
+                            className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                              course.isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {course.isActive ? "Ativo" : "Inativo"}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right whitespace-nowrap">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(`/courses/${course.id}`)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                            onClick={() => handleDelete(course.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

@@ -12,6 +12,8 @@ import {
   Presentation,
   BookOpenCheck,
   UserCheck,
+  BookOpenText,
+  FileBadge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
@@ -42,20 +44,107 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
-  { title: "Início", url: "/dashboard", icon: Home },
-  { title: "Alunos", url: "/students", icon: Users },
-  { title: "Professores", url: "/teachers", icon: GraduationCap },
-  { title: "Cursos", url: "/courses", icon: BookOpen },
-  { title: "Períodos Letivos", url: "/academic-periods", icon: CalendarDays },
-  { title: "Disciplinas", url: "/subjects", icon: Library },
-  { title: "Turmas", url: "/class-groups", icon: Presentation },
-  { title: "Ofertas (Aulas)", url: "/class-subjects", icon: BookOpenCheck },
-  { title: "Matrículas", url: "/enrollments", icon: UserCheck },
+  // Menus Administrativos
+  {
+    title: "Início",
+    url: "/dashboard",
+    icon: Home,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Alunos",
+    url: "/students",
+    icon: Users,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Professores",
+    url: "/teachers",
+    icon: GraduationCap,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Cursos",
+    url: "/courses",
+    icon: BookOpen,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Períodos Letivos",
+    url: "/academic-periods",
+    icon: CalendarDays,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Disciplinas",
+    url: "/subjects",
+    icon: Library,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Turmas",
+    url: "/class-groups",
+    icon: Presentation,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Ofertas (Aulas)",
+    url: "/class-subjects",
+    icon: BookOpenCheck,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+  {
+    title: "Matrículas",
+    url: "/enrollments",
+    icon: UserCheck,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
+
+  // Menus do Professor
+  {
+    title: "Meu Painel",
+    url: "/teacher/dashboard",
+    icon: Home,
+    allowedRoles: ["TEACHER"],
+  },
+  {
+    title: "Meus Diários",
+    url: "/teacher/diaries",
+    icon: BookOpenText,
+    allowedRoles: ["TEACHER"],
+  },
+  {
+    title: "Lançamento de Notas",
+    url: "/teacher/grades",
+    icon: FileBadge,
+    allowedRoles: ["TEACHER"],
+  },
+
+  // Menus do Aluno
+  {
+    title: "Meu Painel",
+    url: "/student/dashboard",
+    icon: Home,
+    allowedRoles: ["STUDENT"],
+  },
+  {
+    title: "Meu Boletim",
+    url: "/student/grades",
+    icon: BookOpenCheck,
+    allowedRoles: ["STUDENT"],
+  },
 ];
 
 function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+
+  const user = AuthService.getUser();
+  const userRole = user?.role || "ADMIN";
+
+  const filteredNavItems = navItems.filter((item) =>
+    item.allowedRoles.includes(userRole),
+  );
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
@@ -73,7 +162,7 @@ function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {filteredNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink

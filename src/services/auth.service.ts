@@ -1,4 +1,3 @@
-import { log } from "console";
 import { api } from "./api";
 
 export const AuthService = {
@@ -13,6 +12,14 @@ export const AuthService = {
 
   logout() {
     localStorage.removeItem("@AcademicSystem:token");
+  },
+
+  getToken() {
+    return localStorage.getItem("@AcademicSystem:token");
+  },
+
+  isAuthenticated() {
+    return !!localStorage.getItem("@AcademicSystem:token");
   },
 
   getUser() {
