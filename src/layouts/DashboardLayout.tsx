@@ -14,6 +14,7 @@ import {
   UserCheck,
   BookOpenText,
   FileBadge,
+  ShieldAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
@@ -73,7 +74,7 @@ const navItems = [
     title: "Períodos Letivos",
     url: "/academic-periods",
     icon: CalendarDays,
-    allowedRoles: ["ADMIN", "COORDINATOR"],
+    allowedRoles: ["ADMIN"],
   },
   {
     title: "Disciplinas",
@@ -97,7 +98,13 @@ const navItems = [
     title: "Matrículas",
     url: "/enrollments",
     icon: UserCheck,
-    allowedRoles: ["ADMIN", "COORDINATOR"],
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Equipa de Gestão",
+    url: "/coordinators",
+    icon: ShieldAlert,
+    allowedRoles: ["ADMIN"],
   },
 
   // Menus do Professor

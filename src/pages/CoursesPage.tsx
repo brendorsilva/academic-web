@@ -7,7 +7,6 @@ import { Course } from "@/types/academic";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { SearchInput } from "@/components/shared/SearchInput";
 
-// Dicionários de Tradução
 const modalityMap: Record<string, string> = {
   PRESENTIAL: "Presencial",
   EAD: "EAD",
@@ -24,7 +23,8 @@ const levelMap: Record<string, string> = {
 
 export default function CoursesPage() {
   const navigate = useNavigate();
-  const [courses, setCourses] = useState<Course[]>([]);
+  // O tipo any aqui é temporário até você adicionar 'coordinator' na sua interface Course
+  const [courses, setCourses] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -48,7 +48,7 @@ export default function CoursesPage() {
     if (window.confirm("Tem a certeza que deseja excluir este curso?")) {
       try {
         await CoursesService.delete(id);
-        fetchCourses(); // Atualiza a lista após excluir
+        fetchCourses();
       } catch (error) {
         console.error("Erro ao excluir curso:", error);
         alert("Erro ao excluir o curso. Ele pode estar vinculado a turmas.");
@@ -104,6 +104,9 @@ export default function CoursesPage() {
                       Nome do Curso
                     </th>
                     <th className="h-12 px-4 text-left font-medium">
+                      Coordenador
+                    </th>
+                    <th className="h-12 px-4 text-left font-medium">
                       Modalidade
                     </th>
                     <th className="h-12 px-4 text-left font-medium">Nível</th>
@@ -117,7 +120,7 @@ export default function CoursesPage() {
                   {filteredCourses.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="h-24 text-center text-muted-foreground"
                       >
                         Nenhum curso encontrado.
@@ -131,6 +134,9 @@ export default function CoursesPage() {
                       >
                         <td className="p-4 font-medium">{course.code}</td>
                         <td className="p-4">{course.name}</td>
+                        <td className="p-4 text-muted-foreground">
+                          {course.coordinator?.name || "Sem coordenador"}
+                        </td>
                         <td className="p-4">
                           {modalityMap[course.modality] || course.modality}
                         </td>

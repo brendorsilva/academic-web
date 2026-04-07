@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CoursesService } from "@/services/courses.service";
 import { Course, Modality, Level } from "@/types/academic";
 import DashboardLayout from "@/layouts/DashboardLayout";
+import { api } from "@/services/api"; // <-- Importamos a API para buscar os coordenadores
 
 export default function CourseFormPage() {
   const { id } = useParams();
@@ -12,7 +13,10 @@ export default function CourseFormPage() {
   const isEditing = Boolean(id && id !== "new");
 
   const [isLoading, setIsLoading] = useState(false);
-  const [form, setForm] = useState<Partial<Course>>({
+  const [coordinators, setCoordinators] = useState<any[]>([]); // Estado para os coordenadores
+  const [form, setForm] = useState<
+    Partial<Course> & { coordinatorId?: string }
+  >({
     name: "",
     code: "",
     modality: "PRESENTIAL" as Modality,
@@ -20,14 +24,29 @@ export default function CourseFormPage() {
     workload: 0,
     durationPeriods: 1,
     isActive: true,
+    coordinatorId: "",
   });
+
+  // Busca os coordenadores disponíveis
+  useEffect(() => {
+    const fetchCoordinators = async () => {
+      try {
+        const response = await api.get("/users/coordinators");
+        setCoordinators(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar coordenadores", error);
+      }
+    };
+    fetchCoordinators();
+  }, []);
 
   useEffect(() => {
     if (isEditing) {
       const fetchCourse = async () => {
         try {
           const data = await CoursesService.getById(id!);
-          setForm(data);
+          // Garantimos que o coordinatorId vem para o form
+          setForm({ ...data, coordinatorId: data.coordinatorId || "" });
         } catch (error) {
           console.error("Erro ao carregar curso:", error);
           navigate("/courses");
@@ -50,7 +69,8 @@ export default function CourseFormPage() {
         isActive: form.isActive,
         workload: Number(form.workload),
         durationPeriods: Number(form.durationPeriods),
-        ...(form.coordinatorId && { coordinatorId: form.coordinatorId }),
+        // Se o valor for vazio, enviamos null para desvincular
+        coordinatorId: form.coordinatorId ? form.coordinatorId : null,
       };
 
       if (isEditing) {
@@ -68,7 +88,7 @@ export default function CourseFormPage() {
   };
 
   const set =
-    (key: keyof Course) =>
+    (key: keyof Course | "coordinatorId") =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
     };
@@ -123,20 +143,22 @@ export default function CourseFormPage() {
               />
             </div>
 
+            {/* --- NOVO CAMPO: COORDENADOR --- */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
+              <label className="text-sm font-medium">
+                Coordenador do Curso
+              </label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={form.isActive ? "true" : "false"}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    isActive: e.target.value === "true",
-                  }))
-                }
+                value={form.coordinatorId || ""}
+                onChange={set("coordinatorId")}
               >
-                <option value="true">Ativo</option>
-                <option value="false">Inativo</option>
+                <option value="">Sem coordenador vinculado</option>
+                {coordinators.map((coord) => (
+                  <option key={coord.id} value={coord.id}>
+                    {coord.name}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -165,6 +187,23 @@ export default function CourseFormPage() {
                 <option value="TECHNICAL">Técnico</option>
                 <option value="GRADUATION">Graduação</option>
                 <option value="POSTGRADUATION">Pós-graduação</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Status</label>
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={form.isActive ? "true" : "false"}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    isActive: e.target.value === "true",
+                  }))
+                }
+              >
+                <option value="true">Ativo</option>
+                <option value="false">Inativo</option>
               </select>
             </div>
 

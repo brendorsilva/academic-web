@@ -31,6 +31,7 @@ import TeacherGradesPage from "./pages/TeacherGradesPage";
 import StudentDashboardPage from "./pages/StudentPageDashboad";
 import StudentGradesPage from "./pages/StudentGradesPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
+import CoordinatorsPage from "./pages/CoordinatorsPage";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ const App = () => (
             />
             <Route path="/enrollments" element={<EnrollmentsPage />} />
             <Route path="/enrollments/new" element={<EnrollmentFormPage />} />
+            <Route path="/coordinators" element={<CoordinatorsPage />} />
           </Route>
 
           {/* Rotas do Professor (Apenas TEACHER) */}
