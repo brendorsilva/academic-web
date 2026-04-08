@@ -32,9 +32,9 @@ export const StudentsService = {
     formData.append("file", file);
 
     const response = await api.post(`/students/${studentId}/photo`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      // headers: {
+      //   "Content-Type": "multipart/form-data",
+      // },
     });
     return response.data;
   },
