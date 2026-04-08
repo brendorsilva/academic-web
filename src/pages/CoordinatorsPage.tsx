@@ -16,6 +16,7 @@ import { DataTable, Column } from "@/components/shared/DataTable";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { api } from "@/services/api";
 import { toast } from "sonner";
+import { CoordinatorService } from "@/services/coordinator.service";
 
 export default function CoordinatorsPage() {
   const [coordinators, setCoordinators] = useState<any[]>([]);
@@ -34,7 +35,7 @@ export default function CoordinatorsPage() {
       const response = await api.get("/users/coordinators");
       setCoordinators(response.data);
     } catch (error) {
-      toast.error("Erro ao carregar a equipa de coordenadores.");
+      toast.error("Erro ao carregar a equipe de coordenadores.");
     } finally {
       setIsLoading(false);
     }
@@ -73,8 +74,22 @@ export default function CoordinatorsPage() {
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    toast.info("A funcionalidade de exclusão será implementada em breve!");
-    // Aqui você pode chamar uma rota DELETE /users/:id futuramente
+    if (
+      window.confirm(
+        "Atenção: Tem a certeza que deseja excluir este professor?",
+      )
+    ) {
+      try {
+        await CoordinatorService.remove(id);
+        toast.success("Coordenador excluído com sucesso.");
+        loadCoordinators();
+      } catch (error) {
+        console.error("Erro ao excluir coordenador:", error);
+        toast.error(
+          "Erro ao excluir o coordenador. Ele pode estar vinculado a turmas.",
+        );
+      }
+    }
   };
 
   const columns: Column<any>[] = [
@@ -137,7 +152,7 @@ export default function CoordinatorsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-foreground">
-              Equipa de Gestão
+              Equipe de Gestão
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
               {isLoading

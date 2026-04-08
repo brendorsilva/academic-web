@@ -101,7 +101,7 @@ const navItems = [
     allowedRoles: ["ADMIN"],
   },
   {
-    title: "Equipa de Gestão",
+    title: "Equipe de Gestão",
     url: "/coordinators",
     icon: ShieldAlert,
     allowedRoles: ["ADMIN"],
