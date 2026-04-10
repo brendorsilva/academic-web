@@ -15,6 +15,7 @@ import {
   BookOpenText,
   FileBadge,
   ShieldAlert,
+  NotebookPen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
@@ -106,6 +107,12 @@ const navItems = [
     icon: ShieldAlert,
     allowedRoles: ["ADMIN"],
   },
+  {
+    title: "Caderno de Notas",
+    url: "/grade-book",
+    icon: NotebookPen,
+    allowedRoles: ["ADMIN", "COORDINATOR"],
+  },
 
   // Menus do Professor
   {
@@ -124,6 +131,12 @@ const navItems = [
     title: "Lançamento de Notas",
     url: "/teacher/grades",
     icon: FileBadge,
+    allowedRoles: ["TEACHER"],
+  },
+  {
+    title: "Caderno de Notas",
+    url: "/grade-book",
+    icon: NotebookPen,
     allowedRoles: ["TEACHER"],
   },
 

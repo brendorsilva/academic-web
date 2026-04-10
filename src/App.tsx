@@ -32,6 +32,7 @@ import StudentDashboardPage from "./pages/StudentPageDashboad";
 import StudentGradesPage from "./pages/StudentGradesPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import CoordinatorsPage from "./pages/CoordinatorsPage";
+import GradeBookPage from "./pages/GradeBookPage";
 
 const queryClient = new QueryClient();
 
@@ -85,6 +86,15 @@ const App = () => (
             <Route path="/enrollments" element={<EnrollmentsPage />} />
             <Route path="/enrollments/new" element={<EnrollmentFormPage />} />
             <Route path="/coordinators" element={<CoordinatorsPage />} />
+          </Route>
+
+          {/* Caderno de Notas — acessível a ADMIN, COORDINATOR e TEACHER */}
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "COORDINATOR", "TEACHER"]} />
+            }
+          >
+            <Route path="/grade-book" element={<GradeBookPage />} />
           </Route>
 
           {/* Rotas do Professor (Apenas TEACHER) */}
