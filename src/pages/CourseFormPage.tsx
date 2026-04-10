@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CoursesService } from "@/services/courses.service";
-import { Course, Modality, Level } from "@/types/academic";
+import { Course, Modality, Level, EvaluationType } from "@/types/academic";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { api } from "@/services/api"; // <-- Importamos a API para buscar os coordenadores
 
@@ -21,6 +21,7 @@ export default function CourseFormPage() {
     code: "",
     modality: "PRESENTIAL" as Modality,
     level: "GRADUATION" as Level,
+    evaluationType: "BIMESTRAL" as EvaluationType,
     workload: 0,
     durationPeriods: 1,
     isActive: true,
@@ -66,10 +67,10 @@ export default function CourseFormPage() {
         code: form.code,
         modality: form.modality,
         level: form.level,
+        evaluationType: form.evaluationType,
         isActive: form.isActive,
         workload: Number(form.workload),
         durationPeriods: Number(form.durationPeriods),
-        // Se o valor for vazio, enviamos null para desvincular
         coordinatorId: form.coordinatorId ? form.coordinatorId : null,
       };
 
@@ -188,6 +189,23 @@ export default function CourseFormPage() {
                 <option value="GRADUATION">Graduação</option>
                 <option value="POSTGRADUATION">Pós-graduação</option>
               </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Regime de Avaliação</label>
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={form.evaluationType || "BIMESTRAL"}
+                onChange={set("evaluationType")}
+              >
+                <option value="BIMESTRAL">Bimestral (4 períodos)</option>
+                <option value="TRIMESTRAL">Trimestral (3 períodos)</option>
+                <option value="SEMESTRAL">Semestral (2 períodos)</option>
+                <option value="ANUAL">Anual (1 período)</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Define quantas divisões de notas o caderno de notas terá.
+              </p>
             </div>
 
             <div className="space-y-2">

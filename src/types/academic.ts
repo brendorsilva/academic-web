@@ -9,6 +9,7 @@ export type Level =
   | "TECHNICAL"
   | "GRADUATION"
   | "POSTGRADUATION";
+export type EvaluationType = "BIMESTRAL" | "TRIMESTRAL" | "SEMESTRAL" | "ANUAL";
 export type SubType = "MANDATORY" | "OPTIONAL" | "ELECTIVE";
 export type PeriodStatus = "ENROLLMENT_OPEN" | "IN_PROGRESS" | "CLOSED";
 export type Shift = "MORNING" | "AFTERNOON" | "NIGHT" | "FULL_TIME";
@@ -21,6 +22,7 @@ export interface Course {
   code: string;
   modality: Modality;
   level: Level;
+  evaluationType: EvaluationType;
   workload: number;
   durationPeriods: number;
   isActive: boolean;
