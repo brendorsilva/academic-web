@@ -207,7 +207,7 @@ export default function TeacherGradesPage() {
     linha("Responsável", currentReceipt.user.name);
     linha(
       "Perfil",
-      currentReceipt.user.role === "TEACHER" ? "Professor(a)" : "Direção",
+      currentReceipt.user.roles?.some((r: any) => r.role === "TEACHER") ? "Professor(a)" : "Direção",
     );
     linha("Aluno", studentName);
     linha("Disciplina", className);

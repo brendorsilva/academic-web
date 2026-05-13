@@ -13,10 +13,11 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    if (user.role === "TEACHER")
+  if (allowedRoles && !allowedRoles.some((r) => user.roles?.includes(r as any))) {
+    const roles: string[] = user.roles ?? [];
+    if (roles.includes("TEACHER") && !roles.includes("ADMIN") && !roles.includes("COORDINATOR"))
       return <Navigate to="/teacher/dashboard" replace />;
-    if (user.role === "STUDENT")
+    if (roles.includes("STUDENT") && roles.length === 1)
       return <Navigate to="/student/dashboard" replace />;
     return <Navigate to="/dashboard" replace />;
   }

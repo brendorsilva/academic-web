@@ -16,6 +16,9 @@ import {
   FileBadge,
   ShieldAlert,
   NotebookPen,
+  Tags,
+  Landmark,
+  ArrowLeftRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
@@ -113,6 +116,24 @@ const navItems = [
     icon: NotebookPen,
     allowedRoles: ["ADMIN", "COORDINATOR"],
   },
+  {
+    title: "Categorias Financeiras",
+    url: "/financial/categories",
+    icon: Tags,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Contas Financeiras",
+    url: "/financial/accounts",
+    icon: Landmark,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Movimentações",
+    url: "/financial/transactions",
+    icon: ArrowLeftRight,
+    allowedRoles: ["ADMIN"],
+  },
 
   // Menus do Professor
   {
@@ -160,10 +181,10 @@ function AppSidebar() {
   const collapsed = state === "collapsed";
 
   const user = AuthService.getUser();
-  const userRole = user?.role || "ADMIN";
+  const userRoles: string[] = user?.roles ?? [];
 
   const filteredNavItems = navItems.filter((item) =>
-    item.allowedRoles.includes(userRole),
+    item.allowedRoles.some((r) => userRoles.includes(r)),
   );
 
   return (

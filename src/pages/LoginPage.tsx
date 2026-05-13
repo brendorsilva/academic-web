@@ -35,21 +35,24 @@ export default function LoginPage() {
       }
 
       // 4. Se a senha já estiver OK, vai para o painel correto
-      console.log("Senha OK. Redirecionando para o painel de:", user?.role);
+      const roles: string[] = user?.roles ?? [];
 
-      if (user?.role === "STUDENT") {
+      if (roles.includes("STUDENT") && roles.length === 1) {
         navigate("/student/dashboard");
-        return; // Sai da função
+        return;
       }
 
-      if (user?.role === "TEACHER") {
+      if (
+        roles.includes("TEACHER") &&
+        !roles.includes("ADMIN") &&
+        !roles.includes("COORDINATOR")
+      ) {
         navigate("/teacher/dashboard");
-        return; // Sai da função
+        return;
       }
 
-      // Se não for aluno nem professor, é ADMIN ou COORDINATOR
       navigate("/dashboard");
-      return; // Sai da função
+      return;
     } catch (error) {
       toast.error("Credenciais inválidas. Tente novamente.");
       console.error(error);

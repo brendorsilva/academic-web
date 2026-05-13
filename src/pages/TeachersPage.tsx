@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Plus, Trash2, Key } from "lucide-react";
+import { Loader2, Plus, Trash2, Key, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -15,11 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DataTable, Column } from "@/components/shared/DataTable";
 import { SearchInput } from "@/components/shared/SearchInput";
-import { Teacher } from "@/types/teacher"; // Certifique-se de que este tipo existe
+import { Teacher } from "@/types/teacher";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { TeachersService } from "@/services/teachers.service"; // Certifique-se de que o serviço tem este nome
+import { TeachersService } from "@/services/teachers.service";
 import { api } from "@/services/api";
 import { toast } from "sonner";
+import { UsersService, UserWithRoles } from "@/services/users.service";
 
 export default function TeachersPage() {
   const [search, setSearch] = useState("");
@@ -27,20 +28,26 @@ export default function TeachersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Estados do Modal de Acesso e Reset de Senha
+  // Modal: Gerar / Resetar Acesso
   const [isAccessModalOpen, setIsAccessModalOpen] = useState(false);
-  const [selectedTeacherForAccess, setSelectedTeacherForAccess] =
-    useState<Teacher | null>(null);
+  const [selectedTeacherForAccess, setSelectedTeacherForAccess] = useState<Teacher | null>(null);
   const [accessEmail, setAccessEmail] = useState("");
   const [accessPassword, setAccessPassword] = useState("");
   const [isGeneratingAccess, setIsGeneratingAccess] = useState(false);
+
+  // Modal: Vincular a usuário existente
+  const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [selectedTeacherForLink, setSelectedTeacherForLink] = useState<Teacher | null>(null);
+  const [eligibleUsers, setEligibleUsers] = useState<UserWithRoles[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [isLinking, setIsLinking] = useState(false);
 
   const loadTeachers = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await TeachersService.getAll();
       setTeachers(data);
-    } catch (error) {
+    } catch {
       toast.error("Erro ao carregar os professores.");
     } finally {
       setIsLoading(false);
@@ -53,26 +60,18 @@ export default function TeachersPage() {
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-
-    if (
-      window.confirm(
-        "Atenção: Tem a certeza que deseja excluir este professor?",
-      )
-    ) {
+    if (window.confirm("Atenção: Tem a certeza que deseja excluir este professor?")) {
       try {
         await TeachersService.delete(id);
         toast.success("Professor excluído com sucesso.");
         loadTeachers();
-      } catch (error) {
-        console.error("Erro ao excluir professor:", error);
-        toast.error(
-          "Erro ao excluir o professor. Ele pode estar vinculado a turmas.",
-        );
+      } catch {
+        toast.error("Erro ao excluir o professor. Ele pode estar vinculado a turmas.");
       }
     }
   };
 
-  // Funções do Gerador de Acesso
+  // ── Gerar / Resetar Acesso ──────────────────────────────────────────────────
   const openAccessModal = (teacher: Teacher, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedTeacherForAccess(teacher);
@@ -83,36 +82,57 @@ export default function TeachersPage() {
 
   const handleGenerateAccess = async () => {
     if (!accessEmail || accessPassword.length < 6) {
-      toast.warning(
-        "Preencha um e-mail válido e uma senha com pelo menos 6 caracteres.",
-      );
+      toast.warning("Preencha um e-mail válido e uma senha com pelo menos 6 caracteres.");
       return;
     }
-
     try {
       setIsGeneratingAccess(true);
-
-      // A GRANDE DIFERENÇA: Aqui enviamos role: 'TEACHER'
       await api.post("/users/generate-access", {
         profileId: selectedTeacherForAccess?.id,
         role: "TEACHER",
         email: accessEmail,
         password: accessPassword,
       });
-
-      toast.success(
-        "Acesso gerado/resetado com sucesso! O professor já pode fazer login.",
-      );
-
+      toast.success("Acesso gerado/resetado com sucesso! O professor já pode fazer login.");
       setIsAccessModalOpen(false);
       setAccessEmail("");
       setAccessPassword("");
       setSelectedTeacherForAccess(null);
     } catch (error: any) {
-      const message = error.response?.data?.message || "Erro ao gerar acesso.";
-      toast.error(message);
+      toast.error(error.response?.data?.message || "Erro ao gerar acesso.");
     } finally {
       setIsGeneratingAccess(false);
+    }
+  };
+
+  // ── Vincular a usuário existente ────────────────────────────────────────────
+  const openLinkModal = async (teacher: Teacher, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const users = await UsersService.getAll();
+      // Apenas usuários sem teacherId vinculado
+      const eligible = users.filter((u) => !u.teacherId);
+      setEligibleUsers(eligible);
+      setSelectedUserId(eligible[0]?.id ?? "");
+      setSelectedTeacherForLink(teacher);
+      setIsLinkModalOpen(true);
+    } catch {
+      toast.error("Erro ao carregar usuários.");
+    }
+  };
+
+  const handleLinkUser = async () => {
+    if (!selectedUserId || !selectedTeacherForLink) return;
+    try {
+      setIsLinking(true);
+      await UsersService.linkTeacher(selectedUserId, selectedTeacherForLink.id);
+      toast.success("Usuário vinculado ao perfil de professor com sucesso!");
+      setIsLinkModalOpen(false);
+      setSelectedTeacherForLink(null);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Erro ao vincular usuário.");
+    } finally {
+      setIsLinking(false);
     }
   };
 
@@ -124,11 +144,7 @@ export default function TeachersPage() {
         <Avatar className="h-8 w-8">
           <AvatarImage src={t.photoUrl} />
           <AvatarFallback className="text-xs bg-muted text-muted-foreground">
-            {t.fullName
-              .split(" ")
-              .slice(0, 2)
-              .map((n) => n[0])
-              .join("")}
+            {t.fullName.split(" ").slice(0, 2).map((n) => n[0]).join("")}
           </AvatarFallback>
         </Avatar>
       ),
@@ -136,9 +152,7 @@ export default function TeachersPage() {
     {
       key: "fullName",
       header: "Nome",
-      render: (t) => (
-        <span className="font-medium text-foreground">{t.fullName}</span>
-      ),
+      render: (t) => <span className="font-medium text-foreground">{t.fullName}</span>,
     },
     {
       key: "cpf",
@@ -160,6 +174,15 @@ export default function TeachersPage() {
       header: "Ações",
       render: (t) => (
         <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-violet-600 hover:text-violet-700 hover:bg-violet-100"
+            onClick={(e) => openLinkModal(t, e)}
+            title="Vincular a usuário existente"
+          >
+            <Link className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -194,9 +217,7 @@ export default function TeachersPage() {
           <div>
             <h2 className="text-2xl font-bold text-foreground">Professores</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {isLoading
-                ? "Carregando professores..."
-                : `${teachers.length} professores cadastrados`}
+              {isLoading ? "Carregando professores..." : `${teachers.length} professores cadastrados`}
             </p>
           </div>
           <Button onClick={() => navigate("/teachers/new")}>
@@ -205,40 +226,28 @@ export default function TeachersPage() {
           </Button>
         </div>
         <div className="flex justify-end">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
-            placeholder="Buscar por nome..."
-          />
+          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome..." />
         </div>
 
         {isLoading ? (
           <div className="flex justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground"></Loader2>
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <DataTable
-            columns={columns}
-            data={filtered}
-            onRowClick={(t) => navigate(`/teachers/${t.id}`)}
-          />
+          <DataTable columns={columns} data={filtered} onRowClick={(t) => navigate(`/teachers/${t.id}`)} />
         )}
       </div>
 
-      {/* MODAL DE GERAR ACESSO / RESET DE SENHA */}
+      {/* MODAL: Gerar / Resetar Acesso */}
       <Dialog open={isAccessModalOpen} onOpenChange={setIsAccessModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Acesso do Professor</DialogTitle>
             <DialogDescription>
               Crie ou resete as credenciais de login para o(a) professor(a){" "}
-              <strong className="text-foreground">
-                {selectedTeacherForAccess?.fullName}
-              </strong>
-              .
+              <strong className="text-foreground">{selectedTeacherForAccess?.fullName}</strong>.
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>E-mail de Acesso</Label>
@@ -262,20 +271,56 @@ export default function TeachersPage() {
               </p>
             </div>
           </div>
-
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsAccessModalOpen(false)}
-              disabled={isGeneratingAccess}
-            >
+            <Button variant="outline" onClick={() => setIsAccessModalOpen(false)} disabled={isGeneratingAccess}>
               Cancelar
             </Button>
-            <Button
-              onClick={handleGenerateAccess}
-              disabled={isGeneratingAccess}
-            >
+            <Button onClick={handleGenerateAccess} disabled={isGeneratingAccess}>
               {isGeneratingAccess ? "A guardar..." : "Guardar Acesso"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL: Vincular a usuário existente */}
+      <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Vincular a usuário existente</DialogTitle>
+            <DialogDescription>
+              Selecione um usuário para vincular ao perfil de{" "}
+              <strong className="text-foreground">{selectedTeacherForLink?.fullName}</strong>.
+              O usuário receberá a função de Professor e poderá acessar as turmas deste perfil.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {eligibleUsers.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Não há usuários disponíveis para vincular. Todos já possuem um perfil de professor.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                <Label>Usuário</Label>
+                <select
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                >
+                  {eligibleUsers.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name} — {u.email} ({u.roles.map((r) => r.role).join(", ")})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsLinkModalOpen(false)} disabled={isLinking}>
+              Cancelar
+            </Button>
+            <Button onClick={handleLinkUser} disabled={isLinking || eligibleUsers.length === 0}>
+              {isLinking ? "A vincular..." : "Vincular"}
             </Button>
           </DialogFooter>
         </DialogContent>

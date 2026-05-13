@@ -16,7 +16,7 @@ export interface GradeAuditReceipt {
   newValue: number | null;
   reason: string | null;
   createdAt: string;
-  user: { name: string; role: string };
+  user: { name: string; roles: { role: string }[] };
   grade: { name: string; date: string };
 }
 

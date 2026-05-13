@@ -91,7 +91,7 @@ export default function GradeBookPage() {
         const all = await ClassSubjectsService.getAll();
         // Professores só veem as próprias disciplinas; admin/coord veem todas
         const filtered =
-          user?.role === "TEACHER"
+          user?.roles?.includes("TEACHER")
             ? all.filter((cs: any) => cs.teacherId === user?.teacherId)
             : all;
         setAllClasses(filtered);
@@ -100,7 +100,7 @@ export default function GradeBookPage() {
       }
     }
     loadClasses();
-  }, [user?.teacherId, user?.role]);
+  }, [user?.teacherId, user?.roles]);
 
   // ── Carregar caderno de notas ao selecionar disciplina
   const loadGradeBook = useCallback(async () => {

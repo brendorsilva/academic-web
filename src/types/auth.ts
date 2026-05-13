@@ -4,7 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: Role;
+  roles: Role[];
   institutionId: string;
   teacherId?: string | null;
   studentId?: string | null;

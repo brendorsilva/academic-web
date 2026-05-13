@@ -33,6 +33,12 @@ import StudentGradesPage from "./pages/StudentGradesPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import CoordinatorsPage from "./pages/CoordinatorsPage";
 import GradeBookPage from "./pages/GradeBookPage";
+import FinancialCategoriesPage from "./pages/FinancialCategoriesPage";
+import FinancialCategoryFormPage from "./pages/FinancialCategoryFormPage";
+import FinancialAccountsPage from "./pages/FinancialAccountsPage";
+import FinancialAccountFormPage from "./pages/FinancialAccountFormPage";
+import FinancialTransactionsPage from "./pages/FinancialTransactionsPage";
+import FinancialTransactionFormPage from "./pages/FinancialTransactionFormPage";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +101,19 @@ const App = () => (
             }
           >
             <Route path="/grade-book" element={<GradeBookPage />} />
+          </Route>
+
+          {/* Módulo Financeiro — apenas ADMIN */}
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route path="/financial/categories" element={<FinancialCategoriesPage />} />
+            <Route path="/financial/categories/new" element={<FinancialCategoryFormPage />} />
+            <Route path="/financial/categories/:id" element={<FinancialCategoryFormPage />} />
+            <Route path="/financial/accounts" element={<FinancialAccountsPage />} />
+            <Route path="/financial/accounts/new" element={<FinancialAccountFormPage />} />
+            <Route path="/financial/accounts/:id" element={<FinancialAccountFormPage />} />
+            <Route path="/financial/transactions" element={<FinancialTransactionsPage />} />
+            <Route path="/financial/transactions/new" element={<FinancialTransactionFormPage />} />
+            <Route path="/financial/transactions/:id" element={<FinancialTransactionFormPage />} />
           </Route>
 
           {/* Rotas do Professor (Apenas TEACHER) */}
