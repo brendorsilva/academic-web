@@ -50,8 +50,10 @@ const statusLabel: Record<TransactionStatus, string> = {
 const fmt = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-const fmtDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("pt-BR");
+const fmtDate = (dateStr: string) => {
+  const [year, month, day] = dateStr.split("T")[0].split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("pt-BR");
+};
 
 const getTodayStr = () => new Date().toISOString().split("T")[0];
 
