@@ -39,6 +39,7 @@ import FinancialAccountsPage from "./pages/FinancialAccountsPage";
 import FinancialAccountFormPage from "./pages/FinancialAccountFormPage";
 import FinancialTransactionsPage from "./pages/FinancialTransactionsPage";
 import FinancialTransactionFormPage from "./pages/FinancialTransactionFormPage";
+import FinancialReportsPage from "./pages/FinancialReportsPage";
 
 const queryClient = new QueryClient();
 
@@ -114,6 +115,7 @@ const App = () => (
             <Route path="/financial/transactions" element={<FinancialTransactionsPage />} />
             <Route path="/financial/transactions/new" element={<FinancialTransactionFormPage />} />
             <Route path="/financial/transactions/:id" element={<FinancialTransactionFormPage />} />
+            <Route path="/financial/reports" element={<FinancialReportsPage />} />
           </Route>
 
           {/* Rotas do Professor (Apenas TEACHER) */}

@@ -19,6 +19,7 @@ import {
   Tags,
   Landmark,
   ArrowLeftRight,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
@@ -132,6 +133,12 @@ const navItems = [
     title: "Movimentações",
     url: "/financial/transactions",
     icon: ArrowLeftRight,
+    allowedRoles: ["ADMIN"],
+  },
+  {
+    title: "Relatórios",
+    url: "/financial/reports",
+    icon: BarChart3,
     allowedRoles: ["ADMIN"],
   },
 
