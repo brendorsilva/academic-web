@@ -42,6 +42,11 @@ export const ClassDiariesService = {
     return response.data;
   },
 
+  // Remove um diário de aula
+  delete: async (diaryId: string) => {
+    await api.delete(`/class-diaries/${diaryId}`);
+  },
+
   // Atualiza as presenças/faltas de um diário
   updateAttendances: async (
     diaryId: string,

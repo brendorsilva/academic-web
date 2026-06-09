@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { format } from "date-fns";
-import { Plus, BookOpenText, CheckSquare, XSquare, Save } from "lucide-react";
+import { Plus, BookOpenText, CheckSquare, XSquare, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,6 +50,10 @@ export default function TeacherDiariesPage() {
   const [editingAttendances, setEditingAttendances] = useState<Attendance[]>(
     [],
   );
+
+  // Estados do Modal de Confirmação de Exclusão
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [diaryToDelete, setDiaryToDelete] = useState<ClassDiary | null>(null);
 
   // 1. Carregar as Turmas do Professor
   useEffect(() => {
@@ -156,6 +160,21 @@ export default function TeacherDiariesPage() {
     }
   };
 
+  // Função para apagar um diário
+  const handleDeleteDiary = async () => {
+    if (!diaryToDelete) return;
+    try {
+      await ClassDiariesService.delete(diaryToDelete.id);
+      toast.success("Aula apagada com sucesso!");
+      setIsDeleteModalOpen(false);
+      setDiaryToDelete(null);
+      const data = await ClassDiariesService.getByClassSubject(selectedClassId);
+      setDiaries(data);
+    } catch (error) {
+      toast.error("Erro ao apagar a aula.");
+    }
+  };
+
   const formatCorrectDate = (isoDate: string) => {
     if (!isoDate) return "";
     const justDate = isoDate.split("T")[0];
@@ -254,14 +273,26 @@ export default function TeacherDiariesPage() {
                         {diary.content}
                       </td>
                       <td className="p-4 text-center">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => openAttendanceModal(diary)}
-                        >
-                          <CheckSquare className="h-4 w-4 mr-2" />
-                          Chamada
-                        </Button>
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => openAttendanceModal(diary)}
+                          >
+                            <CheckSquare className="h-4 w-4 mr-2" />
+                            Chamada
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              setDiaryToDelete(diary);
+                              setIsDeleteModalOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -271,6 +302,33 @@ export default function TeacherDiariesPage() {
           )}
         </div>
       </div>
+
+      {/* Modal: Confirmação de Exclusão */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Apagar Aula</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground py-2">
+            Tem a certeza que deseja apagar a aula do dia{" "}
+            <span className="font-semibold text-foreground">
+              {diaryToDelete ? formatCorrectDate(diaryToDelete.date) : ""}
+            </span>
+            ? Esta ação não pode ser revertida.
+          </p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteDiary}>
+              Sim, apagar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal: Novo Registo de Aula */}
       <Dialog open={isNewDiaryModalOpen} onOpenChange={setIsNewDiaryModalOpen}>
