@@ -2,8 +2,8 @@ import { api } from "./api";
 import { Teacher } from "@/types/teacher";
 
 export const TeachersService = {
-  async getAll(): Promise<Teacher[]> {
-    const response = await api.get("/teachers");
+  async getAll(status: 'active' | 'inactive' | 'all' = 'active'): Promise<Teacher[]> {
+    const response = await api.get("/teachers", { params: { status } });
     return response.data;
   },
 

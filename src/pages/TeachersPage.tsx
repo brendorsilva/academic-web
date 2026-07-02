@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Plus, Trash2, Key, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ export default function TeachersPage() {
   const [search, setSearch] = useState("");
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active');
   const navigate = useNavigate();
 
   // Modal: Gerar / Resetar Acesso
@@ -45,14 +47,14 @@ export default function TeachersPage() {
   const loadTeachers = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await TeachersService.getAll();
+      const data = await TeachersService.getAll(statusFilter);
       setTeachers(data);
     } catch {
       toast.error("Erro ao carregar os professores.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [statusFilter]);
 
   useEffect(() => {
     loadTeachers();
@@ -217,7 +219,9 @@ export default function TeachersPage() {
           <div>
             <h2 className="text-2xl font-bold text-foreground">Professores</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              {isLoading ? "Carregando professores..." : `${teachers.length} professores cadastrados`}
+              {isLoading
+                ? "Carregando professores..."
+                : `${teachers.length} professor${teachers.length !== 1 ? "es" : ""} ${statusFilter === "active" ? "ativos" : statusFilter === "inactive" ? "inativos" : "cadastrados"}`}
             </p>
           </div>
           <Button onClick={() => navigate("/teachers/new")}>
@@ -225,8 +229,17 @@ export default function TeachersPage() {
             Novo Professor
           </Button>
         </div>
-        <div className="flex justify-end">
-          <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome..." />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
+            <TabsList>
+              <TabsTrigger value="active">Ativos</TabsTrigger>
+              <TabsTrigger value="inactive">Inativos</TabsTrigger>
+              <TabsTrigger value="all">Todos</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="sm:ml-auto">
+            <SearchInput value={search} onChange={setSearch} placeholder="Buscar por nome..." />
+          </div>
         </div>
 
         {isLoading ? (
