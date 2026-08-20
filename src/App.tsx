@@ -98,7 +98,9 @@ const App = () => (
           {/* Caderno de Notas — acessível a ADMIN, COORDINATOR e TEACHER */}
           <Route
             element={
-              <ProtectedRoute allowedRoles={["ADMIN", "COORDINATOR", "TEACHER"]} />
+              <ProtectedRoute
+                allowedRoles={["ADMIN", "COORDINATOR", "TEACHER"]}
+              />
             }
           >
             <Route path="/grade-book" element={<GradeBookPage />} />
@@ -106,16 +108,46 @@ const App = () => (
 
           {/* Módulo Financeiro — apenas ADMIN */}
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
-            <Route path="/financial/categories" element={<FinancialCategoriesPage />} />
-            <Route path="/financial/categories/new" element={<FinancialCategoryFormPage />} />
-            <Route path="/financial/categories/:id" element={<FinancialCategoryFormPage />} />
-            <Route path="/financial/accounts" element={<FinancialAccountsPage />} />
-            <Route path="/financial/accounts/new" element={<FinancialAccountFormPage />} />
-            <Route path="/financial/accounts/:id" element={<FinancialAccountFormPage />} />
-            <Route path="/financial/transactions" element={<FinancialTransactionsPage />} />
-            <Route path="/financial/transactions/new" element={<FinancialTransactionFormPage />} />
-            <Route path="/financial/transactions/:id" element={<FinancialTransactionFormPage />} />
-            <Route path="/financial/reports" element={<FinancialReportsPage />} />
+            <Route
+              path="/financial/categories"
+              element={<FinancialCategoriesPage />}
+            />
+            <Route
+              path="/financial/categories/new"
+              element={<FinancialCategoryFormPage />}
+            />
+            <Route
+              path="/financial/categories/:id"
+              element={<FinancialCategoryFormPage />}
+            />
+            <Route
+              path="/financial/accounts"
+              element={<FinancialAccountsPage />}
+            />
+            <Route
+              path="/financial/accounts/new"
+              element={<FinancialAccountFormPage />}
+            />
+            <Route
+              path="/financial/accounts/:id"
+              element={<FinancialAccountFormPage />}
+            />
+            <Route
+              path="/financial/transactions"
+              element={<FinancialTransactionsPage />}
+            />
+            <Route
+              path="/financial/transactions/new"
+              element={<FinancialTransactionFormPage />}
+            />
+            <Route
+              path="/financial/transactions/:id"
+              element={<FinancialTransactionFormPage />}
+            />
+            <Route
+              path="/financial/reports"
+              element={<FinancialReportsPage />}
+            />
           </Route>
 
           {/* Rotas do Professor (Apenas TEACHER) */}
@@ -125,6 +157,16 @@ const App = () => (
               element={<TeacherDashboardPage />}
             />
             <Route path="/teacher/diaries" element={<TeacherDiariesPage />} />
+          </Route>
+
+          {/* Lançamento de Notas — acessível a TEACHER e ADMIN */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={["TEACHER", "ADMIN", "COORDINATOR"]}
+              />
+            }
+          >
             <Route path="/teacher/grades" element={<TeacherGradesPage />} />
           </Route>
 

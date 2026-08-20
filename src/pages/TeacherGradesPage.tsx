@@ -55,9 +55,10 @@ export default function TeacherGradesPage() {
     async function loadClasses() {
       try {
         const all = await ClassSubjectsService.getAll();
-        const teacherClasses = all.filter(
-          (cs: any) => cs.teacherId === user?.teacherId,
-        );
+        // Professores só veem as próprias turmas; admin vê todas
+        const teacherClasses = user?.roles?.includes("TEACHER")
+          ? all.filter((cs: any) => cs.teacherId === user?.teacherId)
+          : all;
         setMyClasses(teacherClasses);
 
         // CORREÇÃO ESLINT 1: Usando setState funcional (prev) para não precisar do selectedClassId nas dependências
@@ -68,8 +69,8 @@ export default function TeacherGradesPage() {
         toast.error("Erro ao carregar turmas.");
       }
     }
-    if (user?.teacherId) loadClasses();
-  }, [user?.teacherId]);
+    loadClasses();
+  }, [user?.teacherId, user?.roles]);
 
   // 2. Carregar os alunos e notas da turma selecionada
   const loadClassData = useCallback(async () => {

@@ -118,6 +118,12 @@ const navItems = [
     allowedRoles: ["ADMIN", "COORDINATOR"],
   },
   {
+    title: "Lançamento de Notas",
+    url: "/teacher/grades",
+    icon: FileBadge,
+    allowedRoles: ["ADMIN"],
+  },
+  {
     title: "Categorias Financeiras",
     url: "/financial/categories",
     icon: Tags,
