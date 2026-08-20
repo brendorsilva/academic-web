@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { addInstitutionalHeader } from "@/utils/pdf-institutional-header";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { AuthService } from "@/services/auth.service";
 import { ClassSubjectsService } from "@/services/class-subjects.service";
@@ -22,6 +23,19 @@ import {
   GradeAuditReceipt,
 } from "@/services/grades.service";
 import { toast } from "sonner";
+
+function getPeriodLabel(evaluationType: string, period: number): string {
+  switch (evaluationType) {
+    case "SEMESTRAL":
+      return `${period}º Semestre`;
+    case "TRIMESTRAL":
+      return `${period}º Trimestre`;
+    case "ANUAL":
+      return "Período Anual";
+    default:
+      return `${period}º Bimestre`;
+  }
+}
 
 export default function TeacherGradesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,7 +58,12 @@ export default function TeacherGradesPage() {
   const [editingGrade, setEditingGrade] = useState<Grade | null>(null); // Se null, é criação. Se preenchido, é edição.
   const [gradeName, setGradeName] = useState("");
   const [gradeValue, setGradeValue] = useState<number | string>("");
+  const [gradePeriod, setGradePeriod] = useState<number>(1);
   const [gradeReason, setGradeReason] = useState(""); // Motivo (obrigatório para edição)
+
+  // Regime avaliativo da turma selecionada (define quantos períodos existem)
+  const [evaluationType, setEvaluationType] = useState<string>("BIMESTRAL");
+  const [periodsCount, setPeriodsCount] = useState<number>(4);
 
   // Estado do Comprovativo
   const [currentReceipt, setCurrentReceipt] =
@@ -77,9 +96,14 @@ export default function TeacherGradesPage() {
     if (!selectedClassId) return;
     setIsLoading(true);
     try {
-      const classData = await ClassSubjectsService.getById(selectedClassId);
+      const [classData, gradeBook] = await Promise.all([
+        ClassSubjectsService.getById(selectedClassId),
+        GradesService.getGradeBook(selectedClassId),
+      ]);
       // Se não atualizou o arquivo de tipos, pode usar (classData as any).studentSubjects
       setStudentsWithGrades(classData.studentSubjects || []);
+      setEvaluationType(gradeBook.evaluationType);
+      setPeriodsCount(gradeBook.periodsCount);
     } catch (error) {
       toast.error("Erro ao carregar lista de alunos.");
     } finally {
@@ -105,6 +129,7 @@ export default function TeacherGradesPage() {
       // É criação
       setGradeName("");
       setGradeValue("");
+      setGradePeriod(1);
       setGradeReason("");
     }
     setIsGradeModalOpen(true);
@@ -145,6 +170,7 @@ export default function TeacherGradesPage() {
           name: gradeName,
           value: Number(gradeValue),
           date: new Date().toISOString(),
+          period: gradePeriod,
         });
         toast.success("Nota lançada com sucesso!");
         setIsGradeModalOpen(false);
@@ -169,28 +195,34 @@ export default function TeacherGradesPage() {
       myClasses.find((c) => c.id === selectedClassId)?.subject?.name ||
       "Disciplina";
 
-    // Cabeçalho
+    // Cabeçalho institucional (logo + dados da instituição)
+    const headerY = addInstitutionalHeader(doc);
+    const titleY = headerY + 8;
+
+    // Título
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("COMPROVANTE DE ALTERAÇÃO DE NOTA", 105, 20, { align: "center" });
+    doc.text("COMPROVANTE DE ALTERAÇÃO DE NOTA", 105, titleY, {
+      align: "center",
+    });
 
     // Subtítulo (Auditoria)
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text(`ID de Auditoria: ${currentReceipt.id}`, 105, 28, {
+    doc.text(`ID de Auditoria: ${currentReceipt.id}`, 105, titleY + 8, {
       align: "center",
     });
 
     // Linha separadora
     doc.setLineWidth(0.5);
-    doc.line(20, 35, 190, 35);
+    doc.line(20, titleY + 15, 190, titleY + 15);
 
     // Corpo do documento
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
     doc.setTextColor(0);
 
-    let y = 45;
+    let y = titleY + 25;
     const linha = (label: string, valor: string) => {
       doc.setFont("helvetica", "bold");
       doc.text(`${label}:`, 20, y);
@@ -402,6 +434,28 @@ export default function TeacherGradesPage() {
                 onChange={(e) => setGradeValue(e.target.value)}
               />
             </div>
+
+            {/* Campo Período (Aparece SOMENTE na Criação — imutável após lançada) */}
+            {!editingGrade && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Período Avaliativo
+                </label>
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={gradePeriod}
+                  onChange={(e) => setGradePeriod(Number(e.target.value))}
+                >
+                  {Array.from({ length: periodsCount }, (_, i) => i + 1).map(
+                    (period) => (
+                      <option key={period} value={period}>
+                        {getPeriodLabel(evaluationType, period)}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </div>
+            )}
 
             {/* Campo Motivo (Aparece SOMENTE na Edição) */}
             {editingGrade && (

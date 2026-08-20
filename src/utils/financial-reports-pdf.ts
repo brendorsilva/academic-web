@@ -7,6 +7,7 @@ import {
   DreReport,
   ReportGroupBy,
 } from "@/services/financial-reports.service";
+import { addInstitutionalHeader } from "./pdf-institutional-header";
 
 const fmt = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -22,20 +23,22 @@ const addReportHeader = (
   title: string,
   subtitle: string,
 ): number => {
+  const startY = addInstitutionalHeader(doc);
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text(title, 14, 18);
+  doc.text(title, 14, startY);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(120);
-  doc.text(subtitle, 14, 25);
+  doc.text(subtitle, 14, startY + 7);
   doc.setTextColor(0);
 
   doc.setDrawColor(220);
-  doc.line(14, 28, 196, 28);
+  doc.line(14, startY + 10, 196, startY + 10);
 
-  return 34;
+  return startY + 16;
 };
 
 const addSummaryRow = (
